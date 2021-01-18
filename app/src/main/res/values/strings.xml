@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">ContactManager</string>
     <string name="enter_name">Enter Something...</string>
+    <string name="todo_list">Enter Your Todo List</string>
 </resources>

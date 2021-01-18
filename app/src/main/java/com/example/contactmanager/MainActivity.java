@@ -1,49 +1,90 @@
 package com.example.contactmanager;
 
-import android.content.SharedPreferences;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+
 public class MainActivity extends AppCompatActivity {
 
-
-    private static final String PREFS_NAME = "myPrefsFile";
     private Button saveBtn;
-    private TextView result;
     private EditText enterMsg;
-    private SharedPreferences myPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        enterMsg = (EditText) findViewById(R.id.name);
-        saveBtn = (Button) findViewById(R.id.saveBtn);
-        result = (TextView) findViewById(R.id.result);
+
+        saveBtn = (Button) findViewById(R.id.button);
+        enterMsg = (EditText) findViewById(R.id.msg);
+
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myPrefs = getSharedPreferences(PREFS_NAME, 0);
-                SharedPreferences.Editor editor = myPrefs
-                        .edit();
-                editor.putString("message",enterMsg.getText().toString());
-                editor.commit();
-                result.setText("Msg :"+enterMsg.getText().toString());
+
+                if (!enterMsg.getText().toString().equals("")) {
+                    String msg = enterMsg.getText().toString();
+                    writeToFile(msg);
+                }else{
+
+                }
             }
         });
 
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME,0);
-        if(prefs.contains("message")){
-            String msg = prefs.getString("message","not found");
-            result.setText("Msg :"+msg);
+        if(readFromFile() != null){
+            enterMsg.setText(readFromFile());
         }
 
 
+    }
+
+    private void writeToFile(String msg) {
+        try {
+            OutputStreamWriter osw = new OutputStreamWriter(
+                    openFileOutput("todolist.txt", Context.MODE_PRIVATE)
+            );
+            osw.write(msg);
+            osw.close();
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String readFromFile() {
+        String res = "";
+
+        try {
+            InputStream inputStream = openFileInput("todolist.txt");
+            if (inputStream != null) {
+
+                InputStreamReader isr = new InputStreamReader(inputStream);
+                BufferedReader bfr = new BufferedReader(isr);
+                String temp = "";
+                StringBuilder sb = new StringBuilder();
+                while ((temp = bfr.readLine()) != null) {
+                    sb.append(temp);
+                }
+                isr.close();
+                res = sb.toString();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return res;
     }
 
 
