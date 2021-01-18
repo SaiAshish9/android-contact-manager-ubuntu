@@ -1,90 +1,58 @@
 package com.example.contactmanager;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.util.List;
+
+import Data.DatabaseHandler;
+import Model.Contact;
 
 public class MainActivity extends AppCompatActivity {
-
-    private Button saveBtn;
-    private EditText enterMsg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        DatabaseHandler db = new DatabaseHandler(this);
+        Log.d("Insert :", "Inserting...");
+        db.addContact(new Contact(
+                "Sai",
+                "123456789"
+        ));
+        db.addContact(new Contact(
+                "Ashish",
+                "123456789"
+        ));
+        db.addContact(new Contact(
+                "Sai9",
+                "345678902"
+        ));
+        Log.d("Reading ", "Reading all contacts ...");
+        List<Contact> contactsList = db.getAllContacts();
 
-        saveBtn = (Button) findViewById(R.id.button);
-        enterMsg = (EditText) findViewById(R.id.msg);
+        Contact oneContact = db.getContact(1);
 
-        saveBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        oneContact.setName("Sai7");
 
-                if (!enterMsg.getText().toString().equals("")) {
-                    String msg = enterMsg.getText().toString();
-                    writeToFile(msg);
-                }else{
+        Log.d("One Contact:", oneContact.getName() + " Phone " + oneContact.getName());
 
-                }
-            }
-        });
+        int newContact = db.updateContact(oneContact);
 
-        if(readFromFile() != null){
-            enterMsg.setText(readFromFile());
+
+        Log.d("New Contact", String.valueOf(newContact));
+
+        db.deleteContact(oneContact);
+
+        Log.d("DB Count:", String.valueOf(db.getContactsCount()));
+
+        for (Contact c : contactsList) {
+            String log = "ID: " + c.getId() + ", Name " + c.getName() + ", Phone: " + c.getPhoneNumber();
+            Log.d("Name :", log);
         }
 
-
-    }
-
-    private void writeToFile(String msg) {
-        try {
-            OutputStreamWriter osw = new OutputStreamWriter(
-                    openFileOutput("todolist.txt", Context.MODE_PRIVATE)
-            );
-            osw.write(msg);
-            osw.close();
-        } catch (FileNotFoundException e) {
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String readFromFile() {
-        String res = "";
-
-        try {
-            InputStream inputStream = openFileInput("todolist.txt");
-            if (inputStream != null) {
-
-                InputStreamReader isr = new InputStreamReader(inputStream);
-                BufferedReader bfr = new BufferedReader(isr);
-                String temp = "";
-                StringBuilder sb = new StringBuilder();
-                while ((temp = bfr.readLine()) != null) {
-                    sb.append(temp);
-                }
-                isr.close();
-                res = sb.toString();
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return res;
     }
 
 
